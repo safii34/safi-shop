@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://safii34.github.io/safi-shop/sitemap.xml
