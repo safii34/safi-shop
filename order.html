@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ثبت سفارش UC پابجی موبایل | Safi Shop</title>
+  <meta name="description" content="ثبت سفارش UC پابجی موبایل در Safi Shop با پرداخت از طریق HesabPay یا ATOMA و ارسال رسید پرداخت.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://safii34.github.io/safi-shop/order.html">
+  <meta property="og:title" content="ثبت سفارش UC پابجی موبایل | Safi Shop">
+  <meta property="og:description" content="ثبت سفارش UC پابجی موبایل با تحویل سریع.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://safii34.github.io/safi-shop/order.html">
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#0d1628;color:#fff}
+    .wrap{max-width:720px;margin:auto;padding:24px 16px 50px}
+    .brand{background:linear-gradient(135deg,#ffb300,#ff5b20);padding:24px 18px;text-align:center;border-radius:0 0 22px 22px}
+    h1{margin:0 0 8px;font-size:27px}.sub{opacity:.9}
+    .card{background:#18253b;border:1px solid #263653;border-radius:18px;padding:22px;margin-top:20px;box-shadow:0 10px 30px #0004}
+    label{display:block;margin:15px 0 7px;font-weight:bold}
+    input,select{width:100%;padding:14px;border:1px solid #405170;border-radius:10px;background:#0e1829;color:#fff;font-size:16px}
+    input:focus,select:focus{outline:2px solid #ffb300;border-color:#ffb300}
+    .price{background:#101c30;padding:14px;border-radius:10px;font-size:20px;font-weight:bold;color:#ffbd19}
+    .payment{background:#101c30;padding:15px;border-radius:10px;line-height:2}
+    button{width:100%;border:0;border-radius:11px;padding:15px;margin-top:20px;background:#20c86b;color:#fff;font-size:18px;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .hint{font-size:13px;color:#aebbd0;margin-top:7px}.msg{margin-top:15px;padding:13px;border-radius:10px;display:none}
+    .ok{display:block;background:#123d29;color:#8dffc0}.err{display:block;background:#4a2020;color:#ffb0b0}
+    .req{color:#ffcf4a}.footer{text-align:center;color:#9eabc0;font-size:13px;margin-top:22px}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Product",
+    "name":"PUBG Mobile UC",
+    "brand":{"@type":"Brand","name":"Safi Shop"},
+    "offers":{"@type":"Offer","priceCurrency":"AFN","price":"720","availability":"https://schema.org/InStock"}
+  }
+  </script>
+</head>
+<body>
+  <header class="brand">
+    <h1>ثبت سفارش UC پابجی موبایل 🎮</h1>
+    <div class="sub">Safi Shop | پرداخت امن و ارسال رسید</div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <form id="orderForm">
+        <label>نوع UC</label>
+        <select name="game" required>
+          <option value="PUBG Mobile">PUBG Mobile</option>
+        </select>
+
+        <label>مقدار</label>
+        <select id="amount" name="amount" required>
+          <option value="60" data-price="70">60 UC</option>
+          <option value="325" data-price="380">325 UC</option>
+          <option value="660" data-price="720" selected>660 UC</option>
+          <option value="1800" data-price="1850">1800 UC</option>
+          <option value="3850" data-price="3600">3850 UC</option>
+          <option value="8100" data-price="6400">8100 UC</option>
+        </select>
+
+        <label>قیمت</label>
+        <div class="price" id="price">720 AFN</div>
+
+        <label>Player ID <span class="req">*</span></label>
+        <input name="playerId" inputmode="numeric" pattern="[0-9]{5,20}" maxlength="20" placeholder="مثلاً 5123456789" required>
+        <div class="hint">Player ID پابجی را با دقت وارد کنید.</div>
+
+        <label>روش پرداخت</label>
+        <select id="payment" name="payment" required>
+          <option value="HesabPay">HesabPay</option>
+          <option value="ATOMA">ATOMA</option>
+        </select>
+
+        <label>اطلاعات پرداخت</label>
+        <div class="payment" id="paymentInfo">HesabPay: <b>0796345081</b></div>
+
+        <label>رسید پرداخت <span class="req">*</span></label>
+        <input id="receipt" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <div class="hint">حداکثر 5MB — فقط عکس رسید پرداخت.</div>
+
+        <button id="submitBtn" type="submit">ثبت Order</button>
+        <div id="msg" class="msg"></div>
+      </form>
+    </section>
+    <div class="footer">پس از ثبت سفارش، اطلاعات برای بررسی و تکمیل سفارش ارسال می‌شود.</div>
+  </main>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycby8GArRWcYWgrXobyRDEwMpy4N6ctXWG8IekoCHoyBcuh2asY5pwIAMsHwbddIW4irKlw/exec";
+const prices = {60:70,325:380,660:720,1800:1850,3850:3600,8100:6400};
+const accounts = {HesabPay:"0796345081", ATOMA:"0793801363"};
+const amount = document.getElementById("amount");
+const price = document.getElementById("price");
+const payment = document.getElementById("payment");
+const paymentInfo = document.getElementById("paymentInfo");
+const form = document.getElementById("orderForm");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("submitBtn");
+
+function updateUI(){
+  price.textContent = (prices[amount.value] ?? 0) + " AFN";
+  paymentInfo.innerHTML = payment.value + ': <b>' + accounts[payment.value] + '</b>';
+}
+amount.addEventListener("change",updateUI);
+payment.addEventListener("change",updateUI);
+updateUI();
+
+function show(text, ok){
+  msg.textContent=text; msg.className="msg "+(ok?"ok":"err");
+}
+
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(String(r.result).split(",")[1]);
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+form.addEventListener("submit", async e=>{
+  e.preventDefault();
+  if(GAS_URL.includes("PASTE_YOUR_")){
+    show("ابتدا URL مربوط به Google Apps Script را در script داخل order.html قرار دهید.",false);
+    return;
+  }
+  const file=document.getElementById("receipt").files[0];
+  if(!file){show("عکس رسید را انتخاب کنید.",false);return;}
+  if(file.size>5*1024*1024){show("حجم عکس نباید بیشتر از 5MB باشد.",false);return;}
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){show("فقط JPG، PNG یا WEBP مجاز است.",false);return;}
+
+  btn.disabled=true; btn.textContent="در حال ارسال...";
+  try{
+    const data={
+      game: form.game.value,
+      amount: form.amount.value,
+      price: prices[form.amount.value],
+      playerId: form.playerId.value.trim(),
+      payment: form.payment.value,
+      paymentAccount: accounts[form.payment.value],
+      receiptName:file.name,
+      receiptType:file.type,
+      receiptBase64:await fileToBase64(file)
+    };
+    const res=await fetch(GAS_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(data)
+    });
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    show("سفارش با موفقیت ارسال شد. لطفاً منتظر بررسی باشید.",true);
+    form.reset(); amount.value="660"; payment.value="HesabPay"; updateUI();
+  }catch(err){
+    console.error(err);
+    show("ارسال سفارش انجام نشد. اتصال یا تنظیمات Google Apps Script را بررسی کنید.",false);
+  }finally{
+    btn.disabled=false; btn.textContent="ثبت Order";
+  }
+});
+</script>
+</body>
+</html>
