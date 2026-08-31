@@ -6,7 +6,6 @@
   <title>ثبت سفارش UC پابجی موبایل | Safi Shop</title>
   <meta name="description" content="ثبت سفارش UC پابجی موبایل در Safi Shop با پرداخت از طریق HesabPay یا ATOMA و ارسال رسید پرداخت.">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="https://safii34.github.io/safi-shop/order.html">
   <meta property="og:title" content="ثبت سفارش UC پابجی موبایل | Safi Shop">
   <meta property="og:description" content="ثبت سفارش UC پابجی موبایل با تحویل سریع.">
   <meta property="og:type" content="website">
@@ -27,6 +26,13 @@
     .hint{font-size:13px;color:#aebbd0;margin-top:7px}.msg{margin-top:15px;padding:13px;border-radius:10px;display:none}
     .ok{display:block;background:#123d29;color:#8dffc0}.err{display:block;background:#4a2020;color:#ffb0b0}
     .req{color:#ffcf4a}.footer{text-align:center;color:#9eabc0;font-size:13px;margin-top:22px}
+    .footer{color: #ce2626; font-size: 14px;}
+    #edris{
+      text-decoration: none;
+      text-align: center;
+      font-size: large;
+    }
+
   </style>
   <script type="application/ld+json">
   {
@@ -41,7 +47,8 @@
 <body>
   <header class="brand">
     <h1>ثبت سفارش UC پابجی موبایل 🎮</h1>
-    <div class="sub">Safi Shop | پرداخت امن و ارسال رسید</div>
+    <div class="sub">Safi Shop | پرداخت امن و ارسال رسید</div><br>
+    <p style="color: rgb(33, 33, 224); font-size: 20px; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; text-shadow: #0e1829; margin: 0.5ch;font-weight: bold;">واریز یوسی ۱۰ دقیقه </p>
   </header>
 
   <main class="wrap">
@@ -86,6 +93,7 @@
         <div id="msg" class="msg"></div>
       </form>
     </section>
+    <p id="edris"  > <a  href="index.html">برگشت صفحه اصلي</a></p>
     <div class="footer">پس از ثبت سفارش، اطلاعات برای بررسی و تکمیل سفارش ارسال می‌شود.</div>
   </main>
 
@@ -156,7 +164,7 @@ form.addEventListener("submit", async e=>{
     form.reset(); amount.value="660"; payment.value="HesabPay"; updateUI();
   }catch(err){
     console.error(err);
-    show("ارسال سفارش انجام نشد. اتصال یا تنظیمات Google Apps Script را بررسی کنید.",false);
+    show("ارسال سفارش انجام نشد. اتصال یا تنظیمات  را بررسی کنید.",false);
   }finally{
     btn.disabled=false; btn.textContent="ثبت Order";
   }
