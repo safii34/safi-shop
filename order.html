@@ -98,77 +98,222 @@
   </main>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbynS9jT5e9GAZbhHL2F5pR6RMXcVnlPNto9dr_Zn5ugwtFtiiEAEsuDdy91q4dU7G7uqA/exec";
-const prices = {60:70,325:350,660:680,1800:1700,3850:3300,8100:6400};
-const accounts = {HesabPay:"0796345081", ATOMA:"0793801363"};
+"use strict";
+
+// آدرس Web App گوگل اسکریپت
+const GAS_URL =
+  "https://script.google.com/macros/s/AKfycbynS9jT5e9GAZbhHL2F5pR6RMXcVnlPNto9dr_Zn5ugwtFtiiEAEsuDdy91q4dU7G7uqA/exec";
+
+// قیمت بسته‌ها به AFN
+const prices = {
+  "60": 70,
+  "325": 350,
+  "660": 680,
+  "1800": 1700,
+  "3850": 3300,
+  "8100": 6400
+};
+
+// شماره‌های پرداخت
+const accounts = {
+  HesabPay: "0796345081",
+  ATOMA: "0793801363"
+};
+
+const form = document.getElementById("orderForm");
 const amount = document.getElementById("amount");
 const price = document.getElementById("price");
 const payment = document.getElementById("payment");
 const paymentInfo = document.getElementById("paymentInfo");
-const form = document.getElementById("orderForm");
+const receiptInput = document.getElementById("receipt");
 const msg = document.getElementById("msg");
 const btn = document.getElementById("submitBtn");
 
-function updateUI(){
-  price.textContent = (prices[amount.value] ?? 0) + " AFN";
-  paymentInfo.innerHTML = payment.value + ': <b>' + accounts[payment.value] + '</b>';
+// به‌روزرسانی قیمت و اطلاعات پرداخت
+function updateUI() {
+  const selectedAmount = amount.value;
+  const selectedPayment = payment.value;
+
+  price.textContent =
+    (prices[selectedAmount] ?? 0) + " AFN";
+
+  paymentInfo.textContent = "";
+
+  const accountLabel = document.createTextNode(
+    selectedPayment + ": "
+  );
+
+  const accountNumber = document.createElement("b");
+  accountNumber.textContent =
+    accounts[selectedPayment] || "";
+
+  paymentInfo.appendChild(accountLabel);
+  paymentInfo.appendChild(accountNumber);
 }
-amount.addEventListener("change",updateUI);
-payment.addEventListener("change",updateUI);
+
+amount.addEventListener("change", updateUI);
+payment.addEventListener("change", updateUI);
+
 updateUI();
 
-function show(text, ok){
-  msg.textContent=text; msg.className="msg "+(ok?"ok":"err");
+// نمایش پیام
+function showMessage(text, success) {
+  msg.textContent = text;
+  msg.className = "msg " + (success ? "ok" : "err");
+  msg.style.display = "block";
 }
 
-function fileToBase64(file){
-  return new Promise((resolve,reject)=>{
-    const r=new FileReader();
-    r.onload=()=>resolve(String(r.result).split(",")[1]);
-    r.onerror=reject;
-    r.readAsDataURL(file);
+// تبدیل عکس به Base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const commaIndex = result.indexOf(",");
+
+      if (commaIndex === -1) {
+        reject(new Error("خواندن عکس ناموفق بود."));
+        return;
+      }
+
+      resolve(result.slice(commaIndex + 1));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("فایل رسید خوانده نشد."));
+    };
+
+    reader.readAsDataURL(file);
   });
 }
 
-form.addEventListener("submit", async e=>{
-  e.preventDefault();
-  if(GAS_URL.includes("PASTE_YOUR_")){
-    show("ابتدا URL مربوط به Google Apps Script را در script داخل order.html قرار دهید.",false);
-    return;
+// بررسی اولیه فرم
+function validateOrder(file) {
+  if (!GAS_URL || !GAS_URL.endsWith("/exec")) {
+    throw new Error("آدرس Google Apps Script صحیح نیست.");
   }
-  const file=document.getElementById("receipt").files[0];
-  if(!file){show("عکس رسید را انتخاب کنید.",false);return;}
-  if(file.size>5*1024*1024){show("حجم عکس نباید بیشتر از 5MB باشد.",false);return;}
-  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){show("فقط JPG، PNG یا WEBP مجاز است.",false);return;}
 
-  btn.disabled=true; btn.textContent="در حال ارسال...";
-  try{
-    const data={
-      game: form.game.value,
-      amount: form.amount.value,
-      price: prices[form.amount.value],
-      playerId: form.playerId.value.trim(),
-      payment: form.payment.value,
-      paymentAccount: accounts[form.payment.value],
-      receiptName:file.name,
-      receiptType:file.type,
-      receiptBase64:await fileToBase64(file)
+  if (!form.playerId.value.trim().match(/^\d{5,20}$/)) {
+    throw new Error("Player ID باید ۵ تا ۲۰ رقم باشد.");
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(prices, amount.value)) {
+    throw new Error("بسته UC انتخاب‌شده معتبر نیست.");
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(accounts, payment.value)) {
+    throw new Error("روش پرداخت معتبر نیست.");
+  }
+
+  if (!file) {
+    throw new Error("لطفاً عکس رسید پرداخت را انتخاب کنید.");
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("فرمت رسید باید JPG، PNG یا WEBP باشد.");
+  }
+
+  if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+    throw new Error("حجم عکس باید بیشتر از صفر و حداکثر 5MB باشد.");
+  }
+}
+
+// ارسال سفارش
+form.addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = "در حال ارسال...";
+  msg.style.display = "none";
+
+  try {
+    const file = receiptInput.files[0];
+
+    validateOrder(file);
+
+    const selectedAmount = amount.value;
+    const selectedPayment = payment.value;
+
+    // نام فیلدها با Google Apps Script هماهنگ است
+    const data = {
+      game: form.elements["game"].value,
+      amount: selectedAmount,
+      price: prices[selectedAmount],
+      playerId: form.elements["playerId"].value.trim(),
+      payment: selectedPayment,
+      paymentAccount: accounts[selectedPayment],
+      receiptName: file.name,
+      receiptType: file.type,
+      receiptBase64: await fileToBase64(file)
     };
-    const res=await fetch(GAS_URL,{
-      method:"POST",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(data)
+
+    // ارسال به Google Apps Script
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(data)
     });
-    if(!res.ok) throw new Error("HTTP "+res.status);
-    show("سفارش با موفقیت ارسال شد. لطفاً منتظر بررسی باشید.",true);
-    form.reset(); amount.value="660"; payment.value="HesabPay"; updateUI();
-  }catch(err){
-    console.error(err);
-    show("ارسال سفارش انجام نشد. اتصال یا تنظیمات  را بررسی کنید.",false);
-  }finally{
-    btn.disabled=false; btn.textContent="ثبت Order";
+
+    if (!response.ok) {
+      throw new Error("خطای HTTP: " + response.status);
+    }
+
+    let result;
+
+    try {
+      result = await response.json();
+    } catch (error) {
+      throw new Error(
+        "پاسخ سرور قابل خواندن نیست. تنظیمات Google Apps Script را بررسی کنید."
+      );
+    }
+
+    if (!result || result.ok !== true) {
+      throw new Error(
+        result && result.message
+          ? result.message
+          : "سرور سفارش را تأیید نکرد."
+      );
+    }
+
+    showMessage(
+      "سفارش و رسید با موفقیت ارسال شد. منتظر بررسی باشید.",
+      true
+    );
+
+    form.reset();
+
+    amount.value = "660";
+    payment.value = "HesabPay";
+
+    updateUI();
+
+  } catch (error) {
+    console.error("Safi Shop order error:", error);
+
+    showMessage(
+      error.message ||
+        "ارسال سفارش ناموفق بود. اتصال اینترنت و تنظیمات سرور را بررسی کنید.",
+      false
+    );
+
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "ثبت Order";
   }
 });
-</script>
+      </script>
+  
 </body>
 </html>
